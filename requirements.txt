@@ -197,8 +197,6 @@ pydeck==0.8.0
 PyDispatcher==2.0.5
 Pygments==2.17.2
 pynndescent==0.5.12
-pyobjc-core==9.0
-pyobjc-framework-Cocoa==9.0
 pyOpenSSL==24.0.0
 pyparsing==3.0.9
 pyppmd==1.0.0

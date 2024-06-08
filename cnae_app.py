@@ -18,30 +18,28 @@ def get_model():
     return SentenceTransformer('distiluse-base-multilingual-cased-v1')
 
 @st.cache_data
-def get_recommendations(df, cnae_cliente):
+def get_recommendations(df, cnae_cliente, razao_social_cliente):
     model = get_model()
-    razao_social_todos = df.loc[df['CNAE FISCAL PRINCIPAL']==cnae_cliente, 'RAZÃO SOCIAL'].values
+    razao_social_todos = razao_social_cliente + df.loc[df['CNAE FISCAL PRINCIPAL']==cnae_cliente, 'RAZÃO SOCIAL'].values.tolist()
     client_embeddings  = model.encode(razao_social_todos)
     df_rec             = df[(df['CNAE FISCAL PRINCIPAL']==cnae_cliente) & (df['CNPJ']!=cnpj_cliente)].copy()
     df_rec['SIMILARIDADE'] = cosine_similarity(client_embeddings)[1:,0]
     df_rec = df_rec.sort_values(by='SIMILARIDADE', ascending=False)
     return df_rec
 
-@st.cache_data
-def get_list_cnpj(df):
-    return df['CNPJ'].unique()
-
 #-------------------------------- DATA LOAD
-df = pd.read_csv('pre-processed-data-100k.csv')
-lista_cnpj = get_list_cnpj(df)
+df = pd.read_csv('pre-processed-data-730k.csv')
+df_clientes = pd.read_csv('clientes.csv')
 
 #-------------------------------- SIDEBAR
 with st.sidebar:
     st.write('# Simulação')
-    top_k = st.number_input("Qtd máxima de recomendações:", min_value=1, max_value=15, value=5, key="top-k")
-    cnpj_cliente = st.selectbox("CNPJ Base:", lista_cnpj)
-    df_cliente = df[df['CNPJ']==cnpj_cliente].copy()
+    # top_k = st.number_input("Qtd máxima de recomendações:", min_value=1, max_value=15, value=5, key="top-k")
+    top_k = st.selectbox("Qtd máxima de recomendações:", options=[10, 20, 30, 50, 100, 200], index=0)
+    cnpj_cliente = st.selectbox("CNPJ Base:", df_clientes['CNPJ'].unique())
+    df_cliente = df_clientes[df_clientes['CNPJ']==cnpj_cliente].copy()
     cnae_cliente = df_cliente['CNAE FISCAL PRINCIPAL'].values[0]
+    razao_social_cliente = df_clientes.loc[df_clientes['CNPJ']==cnpj_cliente,'RAZÃO SOCIAL'].values.tolist()
 
 st.write("# Info Cliente:")
 st.write(f"**CNPJ Base:** {cnpj_cliente}")
@@ -52,10 +50,9 @@ st.write(f"**CNAE secundária:** {df_cliente['CNAE FISCAL SECUNDÁRIA'].values[0
 st.divider()
 
 st.write("# Recomendações:")
-# razao_social_todos = df.loc[df['CNAE FISCAL PRINCIPAL']==cnae_cliente, 'RAZÃO SOCIAL'].values
-# df_rec             = df[(df['CNAE FISCAL PRINCIPAL']==cnae_cliente) & (df['CNPJ']!=cnpj_cliente)].copy()
 
-df_rec = get_recommendations(df, cnae_cliente)
+# with st.spinner('Buscando recomendações...'):
+df_rec = get_recommendations(df, cnae_cliente, razao_social_cliente)
 
 st.data_editor(
     df_rec.head(top_k).reset_index(drop=True),

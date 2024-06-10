@@ -15,7 +15,7 @@ st.set_page_config(
 #-------------------------------- CACHED FUNCTIONS
 @st.cache_data
 def get_model():
-    return SentenceTransformer('distiluse-base-multilingual-cased-v1')
+    return SentenceTransformer('distiluse-base-multilingual-cased-v1', truncate_dim=128)
 
 @st.cache_data
 def get_recommendations(df, cnae_cliente, razao_social_cliente):

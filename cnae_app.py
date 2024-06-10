@@ -17,7 +17,7 @@ st.set_page_config(
 def get_model():
     return SentenceTransformer('distiluse-base-multilingual-cased-v1', truncate_dim=64)
 
-@st.cache_data(max_entries=500, show_spinner="Buscando recomendações...")
+@st.cache_data(show_spinner="Buscando recomendações...")
 def get_recommendations(df, cnae_cliente, razao_social_cliente):
     model = get_model()
     razao_social_todos = razao_social_cliente + df.loc[df['CNAE FISCAL PRINCIPAL']==cnae_cliente, 'RAZÃO SOCIAL'].values.tolist()

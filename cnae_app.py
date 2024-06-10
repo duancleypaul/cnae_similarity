@@ -29,7 +29,7 @@ def get_recommendations(df, cnae_cliente, razao_social_cliente):
 
 @st.cache_data
 def read_data():
-    return pd.read_csv('pre-processed-data-730k.csv'), pd.read_csv('clientes.csv')
+    return pd.read_csv('pre-processed-data-730k.csv'), pd.read_csv('preprocessed-clientes.csv')
 
 #-------------------------------- DATA LOAD
 df, df_clientes = read_data()

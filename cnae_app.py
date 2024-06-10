@@ -15,7 +15,7 @@ st.set_page_config(
 #-------------------------------- CACHED FUNCTIONS
 @st.cache_resource(show_spinner=False)
 def get_model():
-    return SentenceTransformer('distiluse-base-multilingual-cased-v1', truncate_dim=128)
+    return SentenceTransformer('distiluse-base-multilingual-cased-v1', truncate_dim=64)
 
 @st.cache_data(max_entries=500, show_spinner="Buscando recomendações...")
 def get_recommendations(df, cnae_cliente, razao_social_cliente):

@@ -51,8 +51,8 @@ st.divider()
 
 st.write("# Recomendações:")
 
-# with st.spinner('Buscando recomendações...'):
-df_rec = get_recommendations(df, cnae_cliente, razao_social_cliente)
+with st.spinner('Buscando recomendações...'):
+    df_rec = get_recommendations(df, cnae_cliente, razao_social_cliente)
 
 st.data_editor(
     df_rec.head(top_k).reset_index(drop=True),

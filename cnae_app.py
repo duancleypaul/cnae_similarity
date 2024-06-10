@@ -13,11 +13,11 @@ st.set_page_config(
 )
 
 #-------------------------------- CACHED FUNCTIONS
-@st.cache_data
+@st.cache_resource
 def get_model():
     return SentenceTransformer('distiluse-base-multilingual-cased-v1', truncate_dim=128)
 
-@st.cache_data
+@st.cache_data(max_entries=500)
 def get_recommendations(df, cnae_cliente, razao_social_cliente):
     model = get_model()
     razao_social_todos = razao_social_cliente + df.loc[df['CNAE FISCAL PRINCIPAL']==cnae_cliente, 'RAZÃO SOCIAL'].values.tolist()
@@ -27,14 +27,15 @@ def get_recommendations(df, cnae_cliente, razao_social_cliente):
     df_rec = df_rec.sort_values(by='SIMILARIDADE', ascending=False)
     return df_rec
 
+@st.cache_data
+def read_data():
+    return pd.read_csv('pre-processed-data-730k.csv'), pd.read_csv('clientes.csv')
 #-------------------------------- DATA LOAD
-df = pd.read_csv('pre-processed-data-730k.csv')
-df_clientes = pd.read_csv('clientes.csv')
+df, df_clientes = read_data()
 
 #-------------------------------- SIDEBAR
 with st.sidebar:
     st.write('# Simulação')
-    # top_k = st.number_input("Qtd máxima de recomendações:", min_value=1, max_value=15, value=5, key="top-k")
     top_k = st.selectbox("Qtd máxima de recomendações:", options=[10, 20, 30, 50, 100, 200], index=0)
     cnpj_cliente = st.selectbox("CNPJ Base:", df_clientes['CNPJ'].unique())
     df_cliente = df_clientes[df_clientes['CNPJ']==cnpj_cliente].copy()

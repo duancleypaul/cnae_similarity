@@ -37,17 +37,15 @@ def normalize(series):
 
 @st.cache_data
 def calculate_efficiency(df):
-    # Normalize the columns
     df['INICIO DA ATIVIDADE_norm'] = normalize(df['INICIO DA ATIVIDADE'])
-    df['PORTE DA EMPRESA_norm'] = normalize(df['PORTE DA EMPRESA'])
-
-    # Apply the weights
-    df['Efficiency_Score'] = (df['INICIO DA ATIVIDADE_norm'] * 0.4) + (df['PORTE DA EMPRESA_norm'] * 0.6)
-
-    # Since 'quanto menor melhor', invert the scores for ranking
-    df['Efficiency_Score'] = 1 - df['Efficiency_Score']
-
-    return df.sort_values(by='Efficiency_Score', ascending=False).drop(columns=['INICIO DA ATIVIDADE_norm','PORTE DA EMPRESA_norm','Efficiency_Score']).copy()
+    df['PORTE DA EMPRESA_norm']    = normalize(df['PORTE DA EMPRESA'])
+    df['Efficiency_Score']         = (df['INICIO DA ATIVIDADE_norm'] * 0.4) + (df['PORTE DA EMPRESA_norm'] * 0.6)
+    df['Efficiency_Score']         = 1 - df['Efficiency_Score']
+    df['SCORE']                    = df[['SIMILARIDADE','Efficiency_Score']].mean(axis=1)
+    df                             = df.drop(columns=['SIMILARIDADE','Efficiency_Score','INICIO DA ATIVIDADE_norm','PORTE DA EMPRESA_norm'])
+    
+    return df.sort_values(by='SCORE', ascending=False).copy()
+    
 #-------------------------------- DATA LOAD
 df, df_clientes = read_data()
 

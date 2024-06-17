@@ -31,6 +31,23 @@ def get_recommendations(df, cnae_cliente, nome_cliente):
 def read_data():
     return pd.read_csv('pre-processed-data-100k.csv'), pd.read_csv('preprocessed-clientes.csv')
 
+@st.cache_data
+def normalize(series):
+    return (series - series.min()) / (series.max() - series.min())
+
+@st.cache_data
+def calculate_efficiency(df):
+    # Normalize the columns
+    df['INICIO DA ATIVIDADE_norm'] = normalize(df['INICIO DA ATIVIDADE'])
+    df['PORTE DA EMPRESA_norm'] = normalize(df['PORTE DA EMPRESA'])
+
+    # Apply the weights
+    df['Efficiency_Score'] = (df['INICIO DA ATIVIDADE_norm'] * 0.4) + (df['PORTE DA EMPRESA_norm'] * 0.6)
+
+    # Since 'quanto menor melhor', invert the scores for ranking
+    df['Efficiency_Score'] = 1 - df['Efficiency_Score']
+
+    return df.sort_values(by='Efficiency_Score', ascending=False).drop(columns=['INICIO DA ATIVIDADE_norm','PORTE DA EMPRESA_norm','Efficiency_Score']).copy()
 #-------------------------------- DATA LOAD
 df, df_clientes = read_data()
 
@@ -55,6 +72,7 @@ st.divider()
 st.write("# Recomendações:")
 
 df_rec = get_recommendations(df, cnae_cliente, nome_cliente)
+df_rec = calculate_efficiency(df_rec)
 
 st.data_editor(
     df_rec.drop(columns='NOME').head(top_k).reset_index(drop=True),
